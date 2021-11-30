@@ -3,14 +3,13 @@ import env.utils as U
 from env.base import Agent
 
 
-class Evader(Agent):
+class Cargo(Agent):
     def __init__(self, experiment):
-        super(Evader, self).__init__()
+        super(Cargo, self).__init__()
         self.obs_radius = experiment.obs_radius
         self.world_size = experiment.world_size
         self.torus = experiment.torus
         self.dynamics = 'direct'
-        self.bounding_box = np.array([0., self.world_size, 0., self.world_size])
         self.max_speed = 2 * 10  # cm/s
         self.action_callback = self.step
 

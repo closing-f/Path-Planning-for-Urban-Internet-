@@ -12,7 +12,7 @@ time_now = time.strftime('%y%m_%d%H%M')
 def parse_args():
     time_now = time.strftime('%y%m_%d%H%M')
     parser = argparse.ArgumentParser("PS-based RL experiments for multi-UAV networks")
-
+    parser.add_argument("--nb_cargos", default=13, type=int)
 
     parser.add_argument("--n_rollout_threads", default=1, type=int)
     parser.add_argument("--n_episodes", default=9000000, type=int)
@@ -69,11 +69,11 @@ def parse_args():
     parser.add_argument("--local_obs", type=int, default=11,
                         help="time encoding(0~256) 9 bit + if_wall")
     parser.add_argument("--nb_PoIs", type=int, default=100, help="the number of PoIs; Fixed para")
-    parser.add_argument("--poi_dim", type=int, default=4, help="deltax,deltay, cover(bool), c_time; Fixed para")
-    parser.add_argument("--dim_a", type=int, default=2, help="v, w; Fixed para")
+    parser.add_argument("--cargo_dim", type=int, default=4, help="deltax,deltay, cover(bool), c_time; Fixed para")
+    parser.add_argument("--action_dim", type=int, default=2, help="v, w; Fixed para")
     parser.add_argument("--n_step", type=int, default=256, help="the time of mission time; Fixed para")
     parser.add_argument("--max_step", default=2, help="step in max_step")
-    parser.add_argument("--world_size", type=float, default=1000, help="The world is cube; Fixed para")
+    parser.add_argument("--world_size", type=int, default=100, help="The world is Square grid; Fixed para")
     # base.py -> action_repeat = 10; self.dt = 0.01; self.max_lin_v = 50; self.max_ang_v = np.pi
     # base.py -> energy_fun = (1/3.0*v**3 - 0.0625*v + 0.03)/30=0.002
     # UAV.py -> self.energy = 3; self.dim_rec_o = (8, 6); self.dim_evader_o = (self.n_evaders, 5);
