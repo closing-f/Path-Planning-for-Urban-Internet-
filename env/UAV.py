@@ -23,6 +23,8 @@ class PointAgent(Agent):
         self.wall = 0
         self.delta_energy = 0
         self.n_step = experiment.n_step
+        self.load=20
+        self.load_list=[]
 
 
         if self.obs_mode == 'sum_obs_no_ori':
@@ -46,31 +48,22 @@ class PointAgent(Agent):
        
         # self.max_ang_velocity = 2 * np.pi
 
-    def reset(self, state):
-        self.state.p_pos = state[0:2]
+    def reset(self,):
         # 还是局限在一个 100的范围内
-        self.state.p_pos[0] = random.randint(0, 200)
-        self.state.p_pos[1] = random.randint(0, 200)
-
-        # self.state.p_orientation = state[2]
-        #初始位置，速度设置为0
-        self.state.xy_vel=np.zeros(2)
-        # self.state.p_vel = np.zeros(2)
-        # self.state.w_vel = np.zeros(2)
-        self.graph_feature = np.inf
-        self.see_evader = 0
-        #能量为3
+        self.state.p_pos[0] = random.randint(0, 20)
+        self.state.p_pos[1] = random.randint(0, 20)
+        
         self.max_energy=3
         self.energy = 3
         self.delta_energy = 0
 
     def is_athome(self):
-        if self.state.p_pos[0] < 1100 and self.state.p_pos[1] < 1100:
+        if self.state.p_pos[0] < 100 and self.state.p_pos[1] < 100:
             return True
         else:
             return False
 
-    def get_observation(self, dm,delta_matrix, nodes, timestep):
+    def get_observation(self, agents,cargos, timestep):
         
         # print(delta_matrix.shape)
         evader_deltax=delta_matrix[-self.n_evaders:,:1]

@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from gym import spaces
 from env.reward_form import RewardForm
-from env.base import World
+from env.world import World
 from env.UAV import PointAgent
 from env.Cargo import Cargo
 import matplotlib.pyplot as plt
@@ -27,24 +27,26 @@ class UAVnet(gym.Env):
         
         self.n_step = arglist.n_step
         # other parameters
-        self.obs_mode = arglist.obs_mode # default='sum_obs_no_ori'
+        self.obs_mode = arglist.obs_mode  # default='sum_obs_no_ori'
         self.dynamics = arglist.dynamics #  default='unicycle'
         self.RewardForm = RewardForm(arglist)
         self.world = World(arglist.world_size, arglist.torus, arglist.dynamics)
         
         self.world.agents = [PointAgent(self) for _ in range(self.n_agnent)]
-        self.world.cargos= [Cargo(self) for _ in range(self.n_cargo)]
+        self.world.cargos = [Cargo(self) for _ in range(self.n_cargo)]
         # [self.world.agents.append(Cargo(self)) for _ in range(self.n_cargo)]
-    @property
-    def agents(self):
+    @property # 对外的接口
+    def policy_agents(self):
         return self.world.policy_agents
-
+    
+    @property
+    def scriped_agents(self): # 对外的接口
+        return self.world.cargos
+    
     @property
     def observation_space(self):
         ob_space = spaces.Box(low=0., high=1., shape=(self.obs_dim_single_all,), dtype=np.float32)
         return ob_space
-
-
 
     @property
     def action_space(self):
@@ -62,69 +64,30 @@ class UAVnet(gym.Env):
 
     def reset(self):
         """
-        dim_rec_o = (self.max_nr_agents - 1, self.uav_obs_dim)
-        dim_evader_o = (self.n_cargo, self.cargo_dim)
-        obs_reset = []
-        for i in range(self.n_agnent):
-            sum_nei_obs = np.ones(dim_rec_o)
-            # local and time is + 2
-            self_obs = np.zeros(self.uav_obs_dim + 2)
-            sum_evader_obs = np.ones(dim_evader_o)
-            ob_current_i = np.hstack([sum_nei_obs.flatten(), self_obs.flatten(), sum_evader_obs.flatten()])
-            obs_reset.append(ob_current_i)
-        # print(obs_reset)
-        obs_reset = np.array(obs_reset)
-        :return: obs_reset -> list
+        :return obs_reset -> list
         """
         self.RewardForm.reset()
         self.world.agents = [PointAgent(self) for _ in range(self.n_agnent)]
-        [self.world.agents.append(Cargo(self)) for _ in range(self.n_cargo)]
-        pursuers = np.zeros((self.n_agnent, 3))
-        evader = np.zeros((100, 2))
-        for i in range(10):
-            for j in range(10):
-                evader[int(i * 10 + j)][0] = 50 + i * 100
-                evader[int(i * 10 + j)][1] = 50 + j * 100
-        self.world.agent_states = pursuers
-        self.world.landmark_states = evader
+        self.world.cargos = [Cargo(self) for _ in range(self.n_cargo)]
         self.world.reset()
         # print(self.world.agents) 106个
         obs_reset = []
         share_obs=[]
-        aa=True
-        for i, bot in enumerate(self.world.policy_agents):
-            shareobs,ob= bot.get_observation(
-                                     self.world.distance_matrix[i, :],
-                                     self.world.delta_matrix[i],
+        
+        for i, agent in enumerate(self.world.policy_agents):
+            shareobs,ob= agent.get_observation(
                                      self.world.agents,
+                                     self.world.cargos,
                                      self.RewardForm.timestep
                                      )
             obs_reset.append(ob)
-            if aa:
+            if i==1:
                 share_obs.append(shareobs)
-                aa=False
 
-        # print("obs_reset: {}".format(obs_reset))
         return share_obs, obs_reset
 
     def step(self, actions=None):
         """
-        dim_rec_o = (self.max_nr_agents - 1, self.uav_obs_dim)
-        dim_evader_o = (self.n_cargo, self.cargo_dim)
-        new_obs = []
-        infos = []
-        for i in range(self.n_agnent):
-            sum_nei_obs = np.ones(dim_rec_o)
-            # local and time is + 2
-            self_obs = np.zeros(self.uav_obs_dim + 2)
-            sum_evader_obs = np.ones(dim_evader_o)
-            ob_current_i = np.hstack([sum_nei_obs.flatten(), self_obs.flatten(), sum_evader_obs.flatten()])
-            new_obs.append(ob_current_i)
-        # print(new_obs)
-        rewards = np.zeros(self.n_agnent, dtype=np.float32)
-        # print(rewards)
-        dones = np.zeros(self.n_agnent)
-        new_obs = np.array(new_obs)
         :param actions: UAV_actions -> self.n_agnent * action_dim = self.n_agnent * 2
         :return: next_obs, r, dones -> 1 is terminal, info -> List[Dict[str, Any]]
         """
@@ -133,36 +96,25 @@ class UAVnet(gym.Env):
         # print(actions)
         assert len(actions) == self.n_agnent
         # print(actions.shape)
-        for agent, action in zip(self.agents, actions):
+        for agent, action in zip(self.policy_agents, actions):
             action = action.flatten()
             
-            # print("action_1： {}".format(action[1]))
+            agent.action = action
             
-            agent.action = action[0:2]
-            
-            # print(agent.action)
-            # if self.world.dim_c > 0:
-            #     agent.action.c = action[2:]
         # 距离原点的距离
         distance_now = self.world.step()
         next_obs = []
         dones = np.zeros(self.n_agnent)
         n_share_obs=[]
-        aa=True
         for i, bot in enumerate(self.world.policy_agents):
-            # print(hop_counts)
-            # bot_in_subset = [list(s) for s in sets if i in s]
-            # [bis.remove(i) for bis in bot_in_subset]
-            next_share_obs,ob = bot.get_observation(self.world.distance_matrix[i, :],
-                                     self.world.delta_matrix[i],
-                                     self.world.agents,
-                                     self.RewardForm.timestep)
-            
-            # print(len(ob))
+            next_share_obs,ob = bot.get_observation(
+                                    self.world.agents,
+                                    self.world.cargos,
+                                    self.RewardForm.timestep)
+
             next_obs.append(ob)
-            if aa:
+            if i==0:
                 n_share_obs.append(next_share_obs)
-                aa=False
             dones[i] = self.is_terminal
         if self.reward_form == 'LT':
             r = self.RewardForm.LT(self.world.agents)
@@ -180,11 +132,7 @@ class UAVnet(gym.Env):
                 'evader_states': self.world.landmark_states,
                 'actions': actions,
                 'distance': distance_now}]
-
-        # if dones[0] == True:
-        #     print("The env is reset")
-        #     self.reset()
-
+        
         return n_share_obs,next_obs, r, dones, info
 
     def render(self, ws, mode='human'):
