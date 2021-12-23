@@ -13,19 +13,13 @@ class Cargo(Agent):
 
     def reset(self, ):
         
-        start_pos_x = np.random.randint(0, 100)
-        start_pos_y = np.random.randint(0, 100)
-        end_pos_x = np.random.randint(0, 100)
-        end_pos_y = np.random.randint(0, 100)
-        
-        self.state.p_pos[0] = start_pos_x
-        self.state.p_pos[1] = start_pos_y
-        self.state.start_pos[0] = start_pos_x
-        self.state.start_pos[1] = start_pos_y
+        end_pos_x = np.random.randint(0, 20)*5
+        end_pos_y = np.random.randint(0, 20)*5
         
         self.state.end_pos[0] = end_pos_x
         self.state.end_pos[1] = end_pos_y
         
+        self.wait_time=np.random.randint(1,10)
         
     
     def step(self, world):
