@@ -18,7 +18,7 @@ class DDPG(nn.Module):
         super(DDPG, self).__init__()
         self.action_scale=1
         self.n_agents = config.nb_UAVs
-        self.dim_a=config.action_dim
+        self.dim_a=config.dim_a
         self.device=config.device
         self.time_dim=config.time_dim
         # self.time_dim=0

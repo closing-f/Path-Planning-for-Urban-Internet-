@@ -50,7 +50,7 @@ class AttentionPretrain(object):
         self.niter = 0
         self.device = torch.device("cuda")
         self.automatic_entropy_tuning = True
-      
+        self.target_entropy = -torch.prod(torch.Tensor(config.dim_a).to(self.device)).item()
         self.log_alpha = torch.zeros(1, requires_grad=True, device=self.device)
         self.alpha_optim = Adam([self.log_alpha], lr=self.q_lr)
         self.n_agents = config.nb_UAVs
@@ -94,9 +94,9 @@ class AttentionPretrain(object):
         Outputs:
             actions: List of actions for each agent
         """
-        action= self.attention_net.forward(observations)
-        
-        return action
+        attention_state ,postion_encode= self.attention_net.forward(observations)
+        action, log_pi, = self.policy.forward(attention_state,postion_encode)
+        return action, log_pi
         # return [a.step(obs, explore=explore) for a, obs in zip(self.agents,
         #                                                        observations)]
 

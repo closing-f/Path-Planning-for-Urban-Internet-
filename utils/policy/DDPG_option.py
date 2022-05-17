@@ -18,7 +18,8 @@ class DDPG(nn.Module):
         super(DDPG, self).__init__()
         self.action_scale=1
         self.n_agents = config.nb_UAVs
-        self.dim_a=config.action_dim
+        # >0.5 : fly to des <0.5 :fly to charge
+        self.dim_a=1
         self.device=config.device
         self.time_dim=config.time_dim
         # self.time_dim=0
@@ -28,7 +29,9 @@ class DDPG(nn.Module):
             nn.LeakyReLU(),
             nn.Linear(128, 32),
             nn.LeakyReLU(),
-            nn.Linear(32, 4)
+            nn.Linear(32, 8),
+            nn.LeakyReLU(),
+            nn.Linear(8, 2)
         )
         self.time_encoding = nn.Sequential(
             nn.Linear(self.time_dim, 8),
@@ -46,10 +49,11 @@ class DDPG(nn.Module):
         for i in range(self.n_agents):
             actor_output = self.policy_net(actor_input[i])
             # print(actor_output.shape)
-            mean, std = actor_output[:,0:2], actor_output[:,2:]
+            mean, std = actor_output[:,0], actor_output[:,1]
             mean_total[i, :] = mean
-            std_total[i, :] = std
+            # std_total[i, :] = std
 
-        std_total = std_total.sum(2, keepdim=True)
+        # std_total = std_total.sum(2, keepdim=True)
         y_t = torch.tanh(mean_total)
-        return y_t, std_total
+        # return y_t, std_total
+        return y_t

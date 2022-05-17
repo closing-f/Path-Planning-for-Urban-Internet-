@@ -94,9 +94,9 @@ class AttentionPretrain(object):
         Outputs:
             actions: List of actions for each agent
         """
-        action= self.attention_net.forward(observations)
-        
-        return action
+        attention_state= self.attention_net.forward(observations)
+        action, log_pi, = self.policy.forward(attention_state)
+        return action, log_pi
         # return [a.step(obs, explore=explore) for a, obs in zip(self.agents,
         #                                                        observations)]
 

@@ -6,27 +6,20 @@ from env.base import Agent
 class Cargo(Agent):
     def __init__(self, experiment):
         super(Cargo, self).__init__()
-        
-        # self.weight=np.random.randint(0, 10)
-        self.weight=1
+        self.obs_radius = experiment.obs_radius
+        self.weight=np.random.randint(0, 10)
         self.wait_time = 0
         self.take_away=False
-        self.end_pos=np.zeros(2)
-        
 
     def reset(self, ):
         
         end_pos_x = np.random.randint(0, 20)*5
         end_pos_y = np.random.randint(0, 20)*5
         
-        self.end_pos[0]= end_pos_x
-        self.end_pos[1] = end_pos_y
+        self.state.end_pos[0] = end_pos_x
+        self.state.end_pos[1] = end_pos_y
         
         self.wait_time=np.random.randint(1,10)
-        
-        self.take_away=False
-        
-        self.weight=np.random.randint(0, 10)
         
     
     def step(self, world):

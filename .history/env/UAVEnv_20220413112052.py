@@ -112,7 +112,7 @@ class UAVnet(gym.Env):
         
         r = self.RewardForm.TimeReward(self.world.agents)
         
-        
+
 
         info = [{'pursuer_states': self.world.agent_states,
                 'actions': actions}]

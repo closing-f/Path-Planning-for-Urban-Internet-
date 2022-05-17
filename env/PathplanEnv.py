@@ -25,7 +25,9 @@ class UAVnet(gym.Env):
         self.cargo_dim = arglist.cargo_dim
         self.obs_dim_single_all = (arglist.nb_UAVs * arglist.uav_obs_dim+self.n_cargos*self.cargo_dim)
         self.action_dim = arglist.action_dim
-      
+        
+        # 设置五个充电站
+        self.charge_station=np.zeros(5,2)
         self.n_step = arglist.n_step
         # other parameters
         self.obs_mode = arglist.obs_mode  # default='sum_obs_no_ori'
@@ -77,8 +79,9 @@ class UAVnet(gym.Env):
         for i, agent in enumerate(self.world.policy_agents):
             obs= agent.get_observation(i,
                                         self.world.cargos,
-                                        self.world.agents,
+                                    self.world.agents,
                                      )
+            
             
             obs_reset.append(obs)
             
@@ -112,7 +115,7 @@ class UAVnet(gym.Env):
         
         r = self.RewardForm.TimeReward(self.world.agents)
         
-        
+
 
         info = [{'pursuer_states': self.world.agent_states,
                 'actions': actions}]

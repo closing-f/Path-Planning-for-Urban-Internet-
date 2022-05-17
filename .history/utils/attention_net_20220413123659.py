@@ -224,7 +224,7 @@ class AttentionNet(nn.Module):
         # print("Neibor..........")
         # print(neibor_all_values)
         
-        # print(poi_all_values)
+        print(poi_all_values)
         attention_state=poi_all_values
         # print(attention_state.shape)
         return attention_state

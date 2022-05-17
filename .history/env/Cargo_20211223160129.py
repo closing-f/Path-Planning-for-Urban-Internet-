@@ -7,12 +7,10 @@ class Cargo(Agent):
     def __init__(self, experiment):
         super(Cargo, self).__init__()
         
-        # self.weight=np.random.randint(0, 10)
-        self.weight=1
+        self.weight=np.random.randint(0, 10)
         self.wait_time = 0
         self.take_away=False
         self.end_pos=np.zeros(2)
-        
 
     def reset(self, ):
         
@@ -25,8 +23,6 @@ class Cargo(Agent):
         self.wait_time=np.random.randint(1,10)
         
         self.take_away=False
-        
-        self.weight=np.random.randint(0, 10)
         
     
     def step(self, world):
