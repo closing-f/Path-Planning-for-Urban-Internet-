@@ -77,8 +77,9 @@ class UAVnet(gym.Env):
         for i, agent in enumerate(self.world.policy_agents):
             obs= agent.get_observation(i,
                                         self.world.cargos,
-                                        self.world.agents,
+                                    self.world.agents,
                                      )
+            
             
             obs_reset.append(obs)
             
@@ -112,7 +113,7 @@ class UAVnet(gym.Env):
         
         r = self.RewardForm.TimeReward(self.world.agents)
         
-        
+
 
         info = [{'pursuer_states': self.world.agent_states,
                 'actions': actions}]

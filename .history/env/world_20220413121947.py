@@ -80,10 +80,10 @@ class World(object):
         
             
         done=np.zeros(self.n_agents)
-        print("cargo action")
+   
         for i, agent in enumerate(self.policy_agents):
             cargo_index = int(agent.action.item())
-            print(cargo_index)
+            # print(cargo_index)
             # weight = self.cargos[cargo_index.item()].weight
             
            

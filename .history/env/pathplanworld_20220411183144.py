@@ -1,4 +1,5 @@
 import numpy as np
+from torch import ne
 from env.Cargo import Cargo
 import env.utils as U
 dynamics = ['point', 'unicycle', 'box2d', 'direct', 'unicycle_acc']
@@ -41,7 +42,8 @@ class World(object):
         self.contact_force = 1e+2
         self.contact_margin = 1e-3
         self.k_energy=0.5
-        self.charge_station=np.zeros((5,2))
+        self.charge_station=np.zeros(5,2)
+        
 
     # return all entities in the world
     @property
@@ -80,31 +82,52 @@ class World(object):
         
             
         done=np.zeros(self.n_agents)
-        print("cargo action")
+   
         for i, agent in enumerate(self.policy_agents):
-            cargo_index = int(agent.action.item())
-            print(cargo_index)
+            
+            path_action = agent.action
+            # print(cargo_index)
+            step_x=0
+            step_y=0
+            
+            cargo_index=agent.cargo_buffer[agent.cargo_step]
+            distance=np.sqrt((agent.position[0]-self.cargos[cargo_index].end_pos[0])**2+(agent.position[1]-self.cargos[cargo_index].end_pos[1])**2)
+            if distance>4:
+                step_x=-4*(agent.position[0]-self.self.cargos[cargo_index].end_pos[0])/distance
+                step_y=-4*(agent.position[1]-self.self.cargos[cargo_index].end_pos[1])/distance
+            else:
+                step_x=-(agent.position[0]-self.self.cargos[cargo_index].end_pos[0])
+                step_y=-(agent.position[1]-self.self.cargos[cargo_index].end_pos[1])
+            agent.need_step=int(distance/4)
             # weight = self.cargos[cargo_index.item()].weight
+            if path_action<0.5:
+                nearst_station_index=0
+                nearst_station_distance=100
+                for i in range(5):
+                    distance=np.sqrt((agent.position[0]-self.charge_station[i][0])**2+(agent.position[1]-self.charge_station[i][1])**2)
+                    if distance <nearst_station_distance:
+                        nearst_station_distance=distance
+                        nearst_station_index=i
+                if distance>4:
+                    step_x=-4*(agent.position[0]-self.charge_station[nearst_station_index][0])/nearst_station_distance
+                    step_y=-4*(agent.position[1]-self.charge_station[nearst_station_index][1])/nearst_station_distance
+                else:
+                    step_x=-(agent.position[0]-self.charge_station[nearst_station_index][0])
+                    step_y=-(agent.position[1]-self.charge_station[nearst_station_index][1])
+                    
+                
             
-           
+                
             
-            distance=(agent.position[0]-self.cargos[cargo_index].end_pos[0])**2+(agent.position[1]-self.cargos[cargo_index].end_pos[1])**2
-            distance=np.sqrt(distance)
-            
-            # print(agent.energy)
+            print(agent.energy)
             if(agent.energy==0):
                 done[i]=1
             else:
                 agent.energy=agent.energy-1
                 
-                # 开始消耗能量~
-                    # 在我们算能量的时候，动作应当从1变成在0.5\\
-                agent.position[0]=self.cargos[cargo_index].end_pos[0]
-                agent.position[1]=self.cargos[cargo_index].end_pos[1]
-                
-                agent.cargo_buffer.append(self.cargos[i].wait_time)
-                self.cargos[i].take_away=True
-                self.cargos[i].wait_time=0
+                agent.position[0]=agent.position[0]+step_x
+                agent.position[1]=agent.position[1]+step_y
+            
 
             # uav step
             

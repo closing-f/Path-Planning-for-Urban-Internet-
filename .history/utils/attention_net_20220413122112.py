@@ -95,13 +95,11 @@ class AttentionNet(nn.Module):
         uav_self_input = observations[:, :, (self.n_agents-1)*self.uav_obs_dim:(self.n_agents)*self.uav_obs_dim] # 6,batchsize,5+2
         
         uav_poi_input= cargo_input[0]
-        print(cargo_input[0].shape)
         if_cargos=torch.zeros((self.n_cargos,1 )).to(device=self.device)
         for i in range(self.n_cargos):
-            if_cargos[i]=uav_poi_input[0][self.poi_dim*i+4-1]
+            if_cargos[i]=uav_poi_input[0][self.poi_dim*i-1]
             # if(uav_poi_input[i][])
-        print("cargo_take away")
-        print(if_cargos)
+        # print(if_cargos)
         # print(uav_poi_input) 
         # uav_poi_input= observations[0, :, self.me_dim_single+self.uav_obs_dim+self.local_obs:]# 6,batchsize,400
         uav_poi_input=torch.reshape(uav_poi_input,(batch_size, self.n_cargos,-1)).permute(1,0,2)
@@ -201,7 +199,7 @@ class AttentionNet(nn.Module):
                 # print("scaled_attend_logits")
                 # print(scaled_attend_logits)
                 attend_weights = F.softmax(scaled_attend_logits, dim=2)
-                # print("PoI Attend weight")
+                print("PoI Attend weight")
 
                 # print(attend_weights)
                 for x in range(self.n_cargos):
@@ -224,7 +222,7 @@ class AttentionNet(nn.Module):
         # print("Neibor..........")
         # print(neibor_all_values)
         
-        # print(poi_all_values)
+        print(poi_all_values)
         attention_state=poi_all_values
         # print(attention_state.shape)
         return attention_state

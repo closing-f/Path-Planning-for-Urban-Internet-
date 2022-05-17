@@ -41,7 +41,7 @@ class World(object):
         self.contact_force = 1e+2
         self.contact_margin = 1e-3
         self.k_energy=0.5
-        self.charge_station=np.zeros((5,2))
+        self.charge_station=np.zeros(5,2)
 
     # return all entities in the world
     @property
@@ -80,7 +80,7 @@ class World(object):
         
             
         done=np.zeros(self.n_agents)
-        print("cargo action")
+   
         for i, agent in enumerate(self.policy_agents):
             cargo_index = int(agent.action.item())
             print(cargo_index)
@@ -91,7 +91,7 @@ class World(object):
             distance=(agent.position[0]-self.cargos[cargo_index].end_pos[0])**2+(agent.position[1]-self.cargos[cargo_index].end_pos[1])**2
             distance=np.sqrt(distance)
             
-            # print(agent.energy)
+            print(agent.energy)
             if(agent.energy==0):
                 done[i]=1
             else:

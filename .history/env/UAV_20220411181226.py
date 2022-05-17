@@ -54,7 +54,7 @@ class PointAgent(Agent):
             
             # 是否被取走，可以放在全局环境中
             cargo_obs[i, 3] = cargos_info[i].take_away
-        num=0
+       
         for i in range(self.nb_UAVs):
             if(i==uav_index):
                 uav_obs[-1, 0] = uav_info[i].energy/self.max_energy
@@ -73,9 +73,12 @@ class PointAgent(Agent):
                 num+=1
                    
         uav_obs=uav_obs.reshape(self.uav_obs_dim*self.nb_UAVs)
+          
         cargo_obs=cargo_obs.reshape(self.cargo_dim*self.nb_cargos)
         obs=np.hstack([uav_obs.flatten(), cargo_obs.flatten()])
         return obs
+
+
     
     
     

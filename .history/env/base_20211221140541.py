@@ -68,7 +68,7 @@ class Agent(Entity):
         # state
         self.state = AgentState()
         # action
- 
+        self.action = Action()
         # script behavior to execute
         self.action_callback = None
         # physical damping
